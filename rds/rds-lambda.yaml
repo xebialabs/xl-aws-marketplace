@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  Sub template that creates a Lambda function that can create databases in a provisioned Aurora PostgreSQL cluster.
+Parameters: 
+  AuroraRDSSecurityGroup:
+    Description: Aurora Security Group
+    Type: 'AWS::EC2::SecurityGroup::Id'
+  AuroraSubnets:
+    Description: The subnets the Aurora cluster is deployed to
+    Type: List<AWS::EC2::Subnet::Id>
+  DBHost:
+    Description: The Postgres DB Host/Endpoint
+    Type: String
+  DBUser:
+    Description: The Postgres DB username
+    Type: String
+  DBPassword:
+    Description: The Postgres DB Password
+    Type: String
+    NoEcho: True
+
+Resources:
+  RDSLambdaRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+        Path: "/"
+        Policies:
+        - PolicyName: lambda_policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - cloudformation:DescribeStacks
+                Resource: '*'
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+  CreateRDSDatabase:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Lambda function to create an RDS database
+      Handler: createdb.handler
+      MemorySize: 128
+      Role: !GetAtt RDSLambdaRole.Arn
+      Runtime: python3.6
+      Timeout: 60
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref AuroraRDSSecurityGroup
+        SubnetIds: !Ref AuroraSubnets
+      Code:
+        S3Bucket: xl-jetpack-aws
+        S3Key: "rds/functions/packages/create-db/lambda.zip"
+  RDSCreateDatabases:
+    Type: Custom::RDSCreateDatabases
+    Properties:
+      ServiceToken: !Ref CreateRDSDatabase
+      DBNames:
+      - xlrelease
+      - xlrarchive
+      - xldeploy
+      DBHost: !Ref DBHost
+      DBUser: !Ref DBUser
+      DBPassword: !Ref DBPassword
+# Outputs:

@@ -1,0 +1,34 @@
+Description: >
+  This template contains the security group required for RDS.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Description: An environment name that will be prefixed to resource names.
+  VPCID:
+    Type: AWS::EC2::VPC::Id
+    Description: The VPC ID the Security Groups should be deployed to
+Resources:
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Secure access to the RDS database by allowing only the ECS cluster
+      VpcId: !Ref VPCID
+      Tags:
+      - Key: Name
+        Value: !Sub ${EnvironmentName}-RDS
+
+  RDSIngressSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RDSSecurityGroup
+      SourceSecurityGroupId: !Ref RDSSecurityGroup
+      IpProtocol: '-1'
+
+
+Outputs:
+  RDSSecurityGroup: 
+    Description: A reference to the security group for RDS
+    Value: !Ref RDSSecurityGroup

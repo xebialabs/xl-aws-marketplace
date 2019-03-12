@@ -1,0 +1,263 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  This template will launch the AWS Marketplace XL JetPack containers in an existing ECS cluster.
+# Metadata: 
+Parameters: 
+  VPCID:
+    Description: The VPC Id
+    Type: AWS::EC2::VPC::Id
+  ECSCluster:
+    Description: The provisioned ECS Cluster ID
+    Type: String
+  ECSServiceRole:
+    Description: The ECS Service role
+    Type: String
+  Fulfilment:
+    Description: The AWS Marketplace fulfilment.
+    Type: String
+    AllowedValues: [xl-jetpack-10]
+  XLJetPackVersion:
+    Description: The version of XL JetPack to deploy
+    AllowedValues: [8.6]
+    Type: String
+  XLJetPackDeployAdminPassword:
+    Description: The admin password of XL JetPack Deploy
+    MinLength: 8
+    Type: String
+    NoEcho: True
+  XLJetPackDeployPort:
+    Description: The port to run XL JetPack Deploy on
+    AllowedPattern: ^[1-9][0-9]{3,4}$
+    Type: String
+    Default: '4516'
+  XLJetPackReleaseAdminPassword:
+    Description: The admin password of XL JetPack Release
+    MinLength: 8
+    Type: String
+    NoEcho: True
+  XLJetPackReleasePort:
+    Description: The port to run XL JetPack Release on
+    AllowedPattern: ^[1-9][0-9]{3,4}$
+    Type: String
+    Default: '5516'
+  LoadBalancer:
+    Description: The Application Load Balancer to register with
+    Type: String
+  ALBSecurityGroup:
+    Description: The Application Load Balancer security group to attach ingress rules to
+    Type: AWS::EC2::SecurityGroup::Id
+  RemoteAccessCIDR:
+    Description: CIDR block for remote access
+    Type: String
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  TaskExecutionRole:
+    Description: The Task Execution Role
+    Type: String
+  DBHost:
+    Description: The Postgres DB Host/Endpoint
+    Type: String
+  DBUser:
+    Description: The Postgres DB username
+    Type: String
+  DBPassword:
+    Description: The Postgres DB Password
+    Type: String
+    NoEcho: True
+  MountPoint:
+    Description: The Linux mount point for the EFS volume
+    Type: String
+    MinLength: '1'
+    Default: /mnt/efs
+  SslCertificateArn:
+    Description: The ARN of the SSL certificate used to secure internet access to the XebiaLabs JetPack instances
+    Type: String
+    Default: ':default'
+
+Mappings:
+  Marketplace:
+    xl-jetpack-10:
+      AWSProductCode: test-123
+      AWSPublicKey: ---
+      AWSPublicKeyVersion: 1
+# Conditions: 
+
+Resources:
+  JetPackService:
+    Type: AWS::ECS::Service
+    DependsOn: [ XLJetPackDeployALBListener, CreateXLJetPackDeployDatabase, XLJetPackReleaseALBListener, CreateXLJetPackReleaseDatabase, CreateXLJetPackReleaseArchiveDatabase ]
+    Properties:
+      Cluster: !Ref ECSCluster
+      Role: !Ref ECSServiceRole
+      DesiredCount: 1
+      LaunchType: EC2
+      LoadBalancers:
+        - ContainerName: xl-jetpack-deploy
+          ContainerPort: !Ref XLJetPackDeployPort
+          TargetGroupArn: !Ref XLJetPackDeployTargetGroup
+        - ContainerName: xl-jetpack-release
+          ContainerPort: !Ref XLJetPackReleasePort
+          TargetGroupArn: !Ref XLJetPackReleaseTargetGroup
+      TaskDefinition: !Ref JetPackTaskDefinition
+  JetPackTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      ContainerDefinitions:
+        - Name: xl-jetpack-release
+          Image: !Join [ ':', [ "xebialabs/xl-jetpack-release", !Ref XLJetPackVersion ] ]
+          Memory: 2048
+          Cpu: 2
+          PortMappings:
+            - ContainerPort: !Ref XLJetPackReleasePort
+              Protocol: tcp
+          Environment:
+            - Name: ADMIN_PASSWORD
+              Value: !Ref XLJetPackReleaseAdminPassword
+            - Name: XL_CLUSTER_MODE
+              Value: default
+            - Name: XL_DB_URL
+              Value: !Sub "jdbc:postgresql://${DBHost}/xlrelease"
+            - Name: XL_DB_USERNAME
+              Value: !Ref DBUser
+            - Name: XL_DB_PASSWORD
+              Value: !Ref DBPassword
+            - Name: XL_REPORT_DB_URL
+              Value: !Sub "jdbc:postgresql://${DBHost}/xlrarchive"
+            - Name: XL_REPORT_DB_USERNAME
+              Value: !Ref DBUser
+            - Name: XL_REPORT_DB_PASSWORD
+              Value: !Ref DBPassword
+            - Name: XL_METRICS_ENABLED
+              Value: "false"
+            - Name: XL_LICENSE_KIND
+              Value: aws
+            - Name: AWS_PRODUCT_CODE
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
+            - Name: AWS_PUBLIC_KEY_VERSION
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
+          Hostname: xl-jetpack-release
+          MountPoints:
+            - ContainerPath: "/opt/xebialabs/xl-release-server/work"
+              SourceVolume: xl-release-work-efs
+        - Name: xl-jetpack-deploy
+          Image: !Join [ ':', [ "xebialabs/xl-jetpack-deploy", !Ref XLJetPackVersion ] ]
+          Memory: 2048
+          Cpu: 2
+          PortMappings:
+            - ContainerPort: !Ref XLJetPackDeployPort
+              Protocol: tcp
+          Environment:
+            - Name: ADMIN_PASSWORD
+              Value: !Ref XLJetPackDeployAdminPassword
+            - Name: XL_CLUSTER_MODE
+              Value: default
+            - Name: XL_DB_URL
+              Value: !Sub "jdbc:postgresql://${DBHost}/xldeploy"
+            - Name: XL_DB_USERNAME
+              Value: !Ref DBUser
+            - Name: XL_DB_PASSWORD
+              Value: !Ref DBPassword
+            - Name: XL_METRICS_ENABLED
+              Value: "false"
+            - Name: XL_LICENSE_KIND
+              Value: aws
+            - Name: AWS_PRODUCT_CODE
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
+            - Name: AWS_PUBLIC_KEY_VERSION
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
+          Hostname: xl-jetpack-deploy
+          MountPoints:
+            - ContainerPath: "/opt/xebialabs/xl-deploy-server/work"
+              SourceVolume: xl-deploy-work-efs
+      Volumes:
+        - Host:
+            SourcePath: !Sub "${MountPoint}/xl-release/work"
+          Name: xl-release-work-efs
+        - Host:
+            SourcePath: !Sub "${MountPoint}/xl-deploy/work"
+          Name: xl-deploy-work-efs
+
+  XLJetPackDeployALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: !Ref XLJetPackDeployPort
+      Protocol: !If [ SslCertificateProvided, HTTPS, HTTP ]
+      Certificates:
+        - !If [ SslCertificateProvided, { CertificateArn: !Ref SslCertificateArn }, !Ref 'AWS::NoValue' ]
+      DefaultActions: 
+        - Type: forward
+          TargetGroupArn: !Ref XLJetPackDeployTargetGroup
+  XLJetPackDeployTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPCID
+      Port: !Ref XLJetPackDeployPort
+      Protocol: HTTP
+      Matcher:
+        # The healthcheck endpoint is protected by the license checker, which will return 402 if no license is present.
+        # Ensure that is treated as a healthy response also.
+        HttpCode: 200-299,402
+      HealthCheckIntervalSeconds: 300
+      HealthCheckPath: /deployit/ha/health
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: 'true'
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: '86400'
+  XLJetPackDeployIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref RemoteAccessCIDR
+      FromPort: !Ref XLJetPackDeployPort
+      ToPort: !Ref XLJetPackDeployPort
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+  XLJetPackReleaseALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: !Ref XLJetPackReleasePort
+      Protocol: !If [ SslCertificateProvided, HTTPS, HTTP ]
+      Certificates:
+        - !If [ SslCertificateProvided, { CertificateArn: !Ref SslCertificateArn }, !Ref 'AWS::NoValue' ]
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref XLJetPackReleaseTargetGroup
+  XLJetPackReleaseTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VPCID
+      Port: !Ref XLJetPackReleasePort
+      Protocol: HTTP
+      Matcher:
+        # The healthcheck endpoint is protected by the license checker, which will return 402 if no license is present.
+        # Ensure that is treated as a healthy response also.
+        HttpCode: 200-299,402
+      HealthCheckIntervalSeconds: 300
+      HealthCheckPath: /ha/health
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: 'true'
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: '86400'
+  XLJetPackReleaseIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: !Ref RemoteAccessCIDR
+      FromPort: !Ref XLJetPackReleasePort
+      ToPort: !Ref XLJetPackReleasePort
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+# Outputs:
