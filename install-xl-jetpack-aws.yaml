@@ -92,7 +92,7 @@ Parameters:
     Description: The AWS Marketplace fulfilment chosen
     Type: String
     AllowedValues:
-    - xl-jetpack-10
+    - 'XL-JetPack-10users'
   XLJetPackInstanceType:
     AllowedValues:
     - m5.large
@@ -102,7 +102,7 @@ Parameters:
     Default: m5.xlarge
   XLJetPackVersion:
     Description: The version of XL JetPack to deploy
-    AllowedValues: [8.6]
+    AllowedValues: ['8.6.0-rc.1']
     Type: String
   XLJetPackDeployPassword:
     Description: The admin password of XL JetPack Deploy

@@ -15,10 +15,10 @@ Parameters:
   Fulfilment:
     Description: The AWS Marketplace fulfilment.
     Type: String
-    AllowedValues: [xl-jetpack-10]
+    AllowedValues: ['XL-JetPack-10users']
   XLJetPackVersion:
     Description: The version of XL JetPack to deploy
-    AllowedValues: [8.6]
+    AllowedValues: ['8.6.0-rc.1']
     Type: String
   XLJetPackDeployAdminPassword:
     Description: The admin password of XL JetPack Deploy
@@ -76,7 +76,7 @@ Parameters:
 
 Mappings:
   Marketplace:
-    xl-jetpack-10:
+    'XL-JetPack-10users':
       AWSProductCode: test-123
       AWSPublicKey: ---
       AWSPublicKeyVersion: 1
@@ -85,7 +85,7 @@ Mappings:
 Resources:
   JetPackService:
     Type: AWS::ECS::Service
-    DependsOn: [ XLJetPackDeployALBListener, CreateXLJetPackDeployDatabase, XLJetPackReleaseALBListener, CreateXLJetPackReleaseDatabase, CreateXLJetPackReleaseArchiveDatabase ]
+    DependsOn: [ XLJetPackDeployALBListener, XLJetPackReleaseALBListener ]
     Properties:
       Cluster: !Ref ECSCluster
       Role: !Ref ECSServiceRole
