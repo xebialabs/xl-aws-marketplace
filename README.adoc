@@ -7,8 +7,6 @@ March 2019
 == Description
 Use Continuous Delivery automation to push applications to Production on AWS in 15 minutes. XL JetPack’s release orchestration, deployment automation, and DevOps blueprints for AWS provide the turbo-boost your apps need for a smooth flight to the cloud.
 
-video::n2F3mSaEzp4[youtube]
-
 For more information visit the https://xebialabs.com/products/xl-jetpack/[XL JetPack] 
 
 == Contents
@@ -18,4 +16,33 @@ Getting XL JetPack running is easy. With just a few short steps, you'll be pushi
 
 == Step-by-step
 === Step 1: Subscribe on the AWS Marketplace
-The XL JetPack 
+XL JetPack is a full featured cloud native Continuous Delivery solution for small teams. Before blasting off with XL JetPack, you'll need to subscribe to XL JetPack on the AWS Marketplace. Click the button below to get started:
+
+[cols="^.^2,^.^"]
+|===
+| image:images/aws-marketplace-logo.jpg[] | image:images/aws-marketplace-subscribe.jpg[]
+|===
+
+=== Step2: Configure a VPC and EC2 Key Pair
+In order to run the AWS CloudFormation templates in this repository you need to have setup an http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html[AWS VPC] and http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[EC2 Key Pair]. If these are already created, you can skip directly to the next Step.
+
+=== Step 3: Configure Amazon Aurora RDS in your VPC
+Before blasting off with XL JetPack, you need to have an https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL] database setup in the VPC that is accessible by XL JetPack to store its data. Furthermore this https://aws.amazon.com/rds/aurora/[Amazon Aurora] instance needs to be configured with a number of databases.
+
+In order to achieve this, there are two options:
+
+==== Step 3.a Existing Amazon Aurora PostgreSQL instance
+If you already have an existing Amazon Aurora PostgreSQL database instance running in your VPC, click the below button to run the CloudFormation template to provision the databases.
+
+https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack-RDS&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/setup-xl-jetpack-rds.yaml[]
+
+
+==== Step 3.b Empty VPC
+If this is an empty VPC, please click the below button to run the CloudFormation template that will setup both Amazon Aurora PostgreSQL and provision the necessary databases. 
+
+https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack-RDS&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/create-xl-jetpack-database.yaml[]
+
+=== Step 4: Launch the XL JetPack stack
+Once you've setup the http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html[AWS VPC] , http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[EC2 Key Pair] and https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL], you can blast off using XL JetPack. 
+
+TODO Add screenshots

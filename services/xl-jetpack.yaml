@@ -57,6 +57,10 @@ Parameters:
   DBHost:
     Description: The Postgres DB Host/Endpoint
     Type: String
+  DBPort:
+    Description: The Postgres DB Port
+    Type: String
+    Default: 5432
   DBUser:
     Description: The Postgres DB username
     Type: String
@@ -105,7 +109,7 @@ Resources:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ ':', [ "xebialabs/xl-jetpack-release", !Ref XLJetPackVersion ] ]
+          Image: !Join [ "", [ "347067721769.dkr.ecr.us-east-1.amazonaws.com/xebialabs/xl-jetpack-release", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -117,13 +121,13 @@ Resources:
             - Name: XL_CLUSTER_MODE
               Value: default
             - Name: XL_DB_URL
-              Value: !Sub "jdbc:postgresql://${DBHost}/xlrelease"
+              Value: !Sub "jdbc:postgresql://${DBHost}:${DBPort}/xlrelease"
             - Name: XL_DB_USERNAME
               Value: !Ref DBUser
             - Name: XL_DB_PASSWORD
               Value: !Ref DBPassword
             - Name: XL_REPORT_DB_URL
-              Value: !Sub "jdbc:postgresql://${DBHost}/xlrarchive"
+              Value: !Sub "jdbc:postgresql://${DBHost}:${DBPort}/xlrarchive"
             - Name: XL_REPORT_DB_USERNAME
               Value: !Ref DBUser
             - Name: XL_REPORT_DB_PASSWORD
@@ -141,7 +145,7 @@ Resources:
             - ContainerPath: "/opt/xebialabs/xl-release-server/work"
               SourceVolume: xl-release-work-efs
         - Name: xl-jetpack-deploy
-          Image: !Join [ ':', [ "xebialabs/xl-jetpack-deploy", !Ref XLJetPackVersion ] ]
+          Image: !Join [ "", [ "347067721769.dkr.ecr.us-east-1.amazonaws.com/xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -153,7 +157,7 @@ Resources:
             - Name: XL_CLUSTER_MODE
               Value: default
             - Name: XL_DB_URL
-              Value: !Sub "jdbc:postgresql://${DBHost}/xldeploy"
+              Value: !Sub "jdbc:postgresql://${DBHost}:${DBPort}/xldeploy"
             - Name: XL_DB_USERNAME
               Value: !Ref DBUser
             - Name: XL_DB_PASSWORD

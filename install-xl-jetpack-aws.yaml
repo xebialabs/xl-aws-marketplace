@@ -18,6 +18,7 @@ Metadata:
         Parameters:
           - RDSSecurityGroup
           - DBHost
+          - DBPort
           - DBUser
           - DBPassword
       - Label:
@@ -66,6 +67,8 @@ Metadata:
         default: RDS Security Group
       DBHost:
         default: Database hostname
+      DBPort:
+        default: Database port
       DBUsername:
         default: Database administrator username
       DBPassword:
@@ -125,6 +128,10 @@ Parameters:
   DBHost:
     Description: The Postgres DB Host/Endpoint
     Type: String
+  DBPort:
+    Description: The Postgres DB Port
+    Type: String
+    Default: 5432
   DBUsername:
     Description: The Postgres DB username
     Type: String
@@ -148,7 +155,7 @@ Resources:
   SecurityGroupsStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/aws/infrastructure/securitygroups.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/securitygroups.yaml
       Parameters:
         EnvironmentName: xl-jetpack-aws
         VPCID: !Ref VPCID
@@ -156,7 +163,7 @@ Resources:
   EFSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/aws/infrastructure/efs.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/efs.yaml
       Parameters:
         EnvironmentName: xl-jetpack-aws
         VPCID: !Ref VPCID
@@ -165,7 +172,7 @@ Resources:
   ECSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/aws/infrastructure/ecs.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/ecs.yaml
       Parameters:
         EnvironmentName: xl-jetpack-aws
         Subnets: !Ref PrivateSubnetID
@@ -180,7 +187,7 @@ Resources:
   LoadBalancerStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/aws/infrastructure/alb.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/alb.yaml
       Parameters:
         EnvironmentName: xl-jetpack-aws
         VPCID: !Ref VPCID
@@ -189,7 +196,7 @@ Resources:
   XLJetPackServices:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/aws/services/xl-jetpack.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/services/xl-jetpack.yaml
       Parameters:
         VPCID: !Ref VPCID
         ECSCluster: !GetAtt ECSStack.Outputs.Cluster
@@ -203,6 +210,7 @@ Resources:
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         TaskExecutionRole: !GetAtt ECSStack.Outputs.ECSTaskExecutionRole
         DBHost: !Ref DBHost
+        DBPort: !Ref DBPort
         DBUser: !Ref DBUsername
         DBPassword: !Ref DBPassword
         VPCCIDR: !Ref VPCCIDR

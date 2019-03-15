@@ -44,7 +44,7 @@ Parameters:
   DBMasterUsername:
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
-    Default: rdsadmin
+    Default: xladmin
     Description: The database admin account username
     MaxLength: '16'
     MinLength: '1'
@@ -108,6 +108,9 @@ Resources:
         AuroraRDSSecurityGroup: !GetAtt RDSSecurityGroupStack.Outputs.RDSSecurityGroup
 
 Outputs:
+  RDSSecurityGroup:
+    Description: The provisioned RDS SecurityGroup
+    Value: !GetAtt RDSSecurityGroupStack.Outputs.RDSSecurityGroup
   AuroraEndPointAddress:
     Description: Aurora Cluster Endpoint address to connect to
     Value: !GetAtt RDSStack.Outputs.AuroraEndpointAddress

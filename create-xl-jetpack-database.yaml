@@ -6,6 +6,7 @@ Metadata:
       - Label:
           default: Network Configuration
         Parameters:
+          - VPCID
           - DataSubnet1ID
           - DataSubnet2ID
       - Label:
@@ -15,20 +16,25 @@ Metadata:
           - DBUsername
           - DBPassword
           - RDSSecurityGroup
-  ParameterLabels:
-    DataSubnet1ID:
-      default: Data subnet 1
-    DataSubnet2ID:
-      default: Data subnet 2
-    DBPassword:
-      default: Database administrator password
-    DBUsername:
-      default: Database administrator username
-    DBHost:
-      default: Database host
-    RDSSecurityGroup:
-      default: RDS Security Group
-Parameters: 
+    ParameterLabels:
+      VPCID:
+        default: VPC ID
+      DataSubnet1ID:
+        default: Data subnet 1
+      DataSubnet2ID:
+        default: Data subnet 2
+      DBPassword:
+        default: Database administrator password
+      DBUsername:
+        default: Database administrator username
+      DBHost:
+        default: Database host
+      RDSSecurityGroup:
+        default: RDS Security Group
+Parameters:
+  VPCID:
+    Description: The VPC Id
+    Type: AWS::EC2::VPC::Id
   DataSubnet1ID:
     Description: The first subnet the Aurora database cluster should be deployed to
     Type: AWS::EC2::Subnet::Id
@@ -56,7 +62,7 @@ Resources:
   RDSCreateDBLambda:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL:  https://s3.amazonaws.com/xl-jetpack-aws/rds/rds-lambda.yaml
+      TemplateURL:  "https://s3.amazonaws.com/xl-jetpack-aws/rds/rds-lambda.yaml"
       Parameters:
         AuroraSubnets: !Join [ ',', [ !Ref DataSubnet1ID, !Ref DataSubnet2ID ]]
         DBUser: !Ref DBUsername
