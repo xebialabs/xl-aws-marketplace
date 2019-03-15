@@ -10,7 +10,7 @@ Use Continuous Delivery automation to push applications to Production on AWS in 
 For more information, visit the https://xebialabs.com/products/xl-jetpack/[XL JetPack] page.
 
 == Contents
-This repository contains a set of https://aws.amazon.com/cloudformation/[AWS CloudFormation] YAML templates that allow you to set up XebiaLabs' leading DevOps platform ,XL JetPack, on AWS.
+This repository contains a set of https://aws.amazon.com/cloudformation/[AWS CloudFormation] YAML templates that allow you to set up XebiaLabs' leading DevOps platform, XL JetPack, on AWS.
 
 Getting XL JetPack running is easy. With just a few short steps, you'll be pushing your own applications to the cloud using XebiaLabs' release orchestration and deployment automation capabilities.
 
@@ -27,7 +27,7 @@ XL JetPack is a full-featured, cloud-native Continuous Delivery solution for sma
 To run the AWS CloudFormation templates in this repository, you must set up an http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html[AWS VPC] and an http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[EC2 Key Pair]. If these are already created, you can go directly to the next step.
 
 === Step 3: Configure Amazon Aurora RDS in your VPC
-Before blasting off with XL JetPack, you must set up an https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL] database in the VPC that is accessible by XL JetPack to store its data. Furthermore, this https://aws.amazon.com/rds/aurora/[Amazon Aurora] instance must be configured with a number of databases.
+You must set up an https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL] database in the VPC that is accessible by XL JetPack to store its data. Furthermore, the https://aws.amazon.com/rds/aurora/[Amazon Aurora] instance must be configured with a number of databases.
 
 There are two options to set up an Aurora database.
 
