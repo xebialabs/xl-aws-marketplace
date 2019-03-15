@@ -1,0 +1,21 @@
+= XL JetPack Installation on AWS Marketplace
+XebiaLabs Development <xl-development@xebialabs.com>
+March 2019
+:source-hightlighter: pygments
+:toc:
+
+== Description
+Use Continuous Delivery automation to push applications to Production on AWS in 15 minutes. XL JetPack’s release orchestration, deployment automation, and DevOps blueprints for AWS provide the turbo-boost your apps need for a smooth flight to the cloud.
+
+video::n2F3mSaEzp4[youtube]
+
+For more information visit the https://xebialabs.com/products/xl-jetpack/[XL JetPack] 
+
+== Contents
+This repository contains a set of https://aws.amazon.com/cloudformation/[AWS CloudFormation] YAML templates that allow you to setup XebiaLabs' leading DevOps platform XL JetPack on AWS.
+
+Getting XL JetPack running is easy. With just a few short steps, you'll be pushing your own applications to the cloud using XebiaLabs' release orchestration and deployment automation capabilities.
+
+== Step-by-step
+=== Step 1: Subscribe on the AWS Marketplace
+The XL JetPack 
