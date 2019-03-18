@@ -109,7 +109,7 @@ Resources:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ "", [ "347067721769.dkr.ecr.us-east-1.amazonaws.com/xebialabs/xl-jetpack-release", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "xebialabs/xl-jetpack-release", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -145,7 +145,7 @@ Resources:
             - ContainerPath: "/opt/xebialabs/xl-release-server/work"
               SourceVolume: xl-release-work-efs
         - Name: xl-jetpack-deploy
-          Image: !Join [ "", [ "347067721769.dkr.ecr.us-east-1.amazonaws.com/xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
