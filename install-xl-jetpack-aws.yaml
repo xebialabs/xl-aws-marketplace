@@ -105,7 +105,7 @@ Parameters:
     Default: m5.xlarge
   XLJetPackVersion:
     Description: The version of XL JetPack to deploy
-    AllowedValues: ['8.6.0-rc.1']
+    AllowedValues: ['8.6.0']
     Type: String
   XLJetPackDeployPassword:
     Description: The admin password of XL JetPack Deploy
