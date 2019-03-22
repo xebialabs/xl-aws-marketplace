@@ -48,6 +48,9 @@ If you've used the CloudFormation stack from step 1, use the DataSubnetA and Dat
 
 image:https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png[link=https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack-RDS&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/setup-xl-jetpack-rds.yaml]
 
+An example configuration of the CloudFormation parameters looks like this:
+
+image:images/rds-cfn-1.png[]
 
 === Step 4: Launch the XL JetPack stack
 After you've set up an http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html[AWS VPC], an http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[EC2 Key Pair], and https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL], you can blast off with XL JetPack.

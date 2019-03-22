@@ -1,27 +1,23 @@
 #!/usr/bin/python
 import psycopg2
-import cfn_resource
+import cfnresponse
 import logging
+import json
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logging.info("Started Lambda!")
-handler = cfn_resource.Resource()
 physical_resource_id = "dummy-resource-id"
 
 def fail(reason, physical_resource_id=physical_resource_id):
-    return {
-        'Status': cfn_resource.FAILED,
-        'Reason': reason,
-        'PhysicalResourceId': physical_resource_id
-    }
+    logger.error("Failed [%s]: %s" % (physical_resource_id, reason))
+    return (cfnresponse.FAILED, physical_resource_id, reason)
 
 def check_props(props, param):
     if param not in props or not props[param]:
         raise Exception('Parameter %s not found.' % param)
     return props[param]
 
-@handler.create
 def create_database(event, context):
     props = event['ResourceProperties']
     logger.info('Got event: %s' % event)
@@ -52,7 +48,8 @@ def create_database(event, context):
             for db_name in db_names:
                 logger.info("Creating database %s on %s" % (db_name, db_host))
                 cursor.execute("CREATE DATABASE %s WITH OWNER %s" % (db_name, db_user))
-            logger.info("Database created")
+                logger.info("Database %s created" % db_name)
+            logger.info("All Databases created.")
         except Exception as e:
             return fail(str(e))
     finally:
@@ -61,8 +58,16 @@ def create_database(event, context):
         if conn:
             conn.close()
     logger.info("Done!")
-    return {
-        'Status': 'SUCCESS',
-        'PhysicalResourceId': physical_resource_id,
-        'Reason': 'Successfully created databases %s' % db_names
-    }
+    return (cfnresponse.SUCCESS, physical_resource_id, 'Successfully created databases %s' % db_names)
+
+def handler(event, context):
+    logger.info('Received event: %s' % json.dumps(event))
+    status = cfnresponse.SUCCESS
+    physical_resource_id = None
+    data = {}
+    reason = None
+    try:
+        if event['RequestType'] == 'Create':
+            status, physical_resource_id, reason = create_database(event, context)
+    finally:
+        cfnresponse.send(event, context, status, data, physical_resource_id, False, reason)
