@@ -70,7 +70,7 @@ Resources:
   RDSCreateDatabases:
     Type: Custom::RDSCreateDatabases
     Properties:
-      ServiceToken: !Ref CreateRDSDatabase
+      ServiceToken: !Ref CreateRDSDatabase.Arn
       DBNames:
       - xlrelease
       - xlrarchive
