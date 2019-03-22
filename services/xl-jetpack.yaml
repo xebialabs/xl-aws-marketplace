@@ -81,8 +81,8 @@ Parameters:
 Mappings:
   Marketplace:
     'XL-JetPack-10users':
-      AWSProductCode: test-123
-      AWSPublicKey: ---
+      AWSProductCode: 75neoqyxrij1cptfd2gj57kdv
+      AWSPublicKey: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQm9qQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FZOEFNSUlCaWdLQ0FZRUF5TFZ5RTl3MWxNc1ZxK1JIeHp3MApyMTNpZkVIc1JieVNkM3QvbUR1UnIralpZQmFFVWdpL0VLR1QrWS9KTnlzSVkrbWZ2MEltNDcvVklIZjJPU0ZiCkFMNHFQdG12c01lc3ZOa2lPdytBMmZrTEI0SHRCb080aTRTN08xTkp6aGxRcGN4RjQzbTlZTjdsUGRDNis5OUkKL2wzOHNPLy9STmdmM2JnSXdhSmpqUEh3azNid1hqRzhkZ1pxY0QxampaSGhlclNpRUNmL2JCT2M5dXJiODFMcApybGdPSGtuUWNTUTgrZElTaVVyYnpFZTRMdjI2Ukx5YUJoSGZacmVISzBDRGdzOUtBVTVPYU0zMm1uYzZ2c01lClZneTJacGMzSHhiblF4UEIvOEd1YmhNWU42clUyclVna0l5eFZrNzNWc2M3WmlFR2UxcDBtUno1V0RrZG5jM2cKbmNkcERUdll4Mlk4Y0g1WHlMN2pMOFNXSm9WRHVMeUVnM0xISDNIVkxNdzZSRFFEU1BwWnZ5aFFlZTJHaFltcgpoSmNpNTdRSmY5VG13bDRYUnBhRENzbkpmeFplUXI0UW5ocldlTXlyWC9WQUFucTZIM2JNUHJ1ZGV0b3ZHMnNGCmxySmFOdmtPQ05VR0JkNzZhUDh5aS8rQ1EyQXUzZTFzS3BURktrQ2lkZ1haQWdNQkFBRT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
       AWSPublicKeyVersion: 1
 # Conditions: 
 
@@ -109,7 +109,7 @@ Resources:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ "", [ "xebialabs/xl-jetpack-release", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -145,7 +145,7 @@ Resources:
             - ContainerPath: "/opt/xebialabs/xl-release-server/work"
               SourceVolume: xl-release-work-efs
         - Name: xl-jetpack-deploy
-          Image: !Join [ "", [ "xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
