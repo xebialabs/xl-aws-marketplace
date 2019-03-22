@@ -104,7 +104,7 @@ Resources:
         AuroraSubnets: !Join [ ',', [ !Ref DataSubnet1ID, !Ref DataSubnet2ID ]]
         DBUser: !Ref DBMasterUsername
         DBPassword: !Ref DBMasterPassword
-        DBHost: !GetAtt RDSStack.Outputs.AuroraEndpointAddress
+        DBHost: !GetAtt RDSStack.Outputs.AuroraEndPointAddress
         AuroraRDSSecurityGroup: !GetAtt RDSSecurityGroupStack.Outputs.RDSSecurityGroup
 
 Outputs:
