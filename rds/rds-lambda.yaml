@@ -5,8 +5,8 @@ Parameters:
   AuroraRDSSecurityGroup:
     Description: Aurora Security Group
     Type: 'AWS::EC2::SecurityGroup::Id'
-  AuroraSubnets:
-    Description: The subnets the Aurora cluster is deployed to
+  PrivateSubnets:
+    Description: The subnets the Lambda should be deployed to
     Type: List<AWS::EC2::Subnet::Id>
   DBHost:
     Description: The Postgres DB Host/Endpoint
@@ -59,11 +59,11 @@ Resources:
       MemorySize: 128
       Role: !GetAtt RDSLambdaRole.Arn
       Runtime: python3.6
-      Timeout: 60
+      Timeout: 10
       VpcConfig:
         SecurityGroupIds:
           - !Ref AuroraRDSSecurityGroup
-        SubnetIds: !Ref AuroraSubnets
+        SubnetIds: !Ref PrivateSubnets
       Code:
         S3Bucket: xl-jetpack-aws
         S3Key: "rds/functions/packages/create-db/lambda.zip"

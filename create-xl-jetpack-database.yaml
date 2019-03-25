@@ -19,10 +19,8 @@ Metadata:
     ParameterLabels:
       VPCID:
         default: VPC ID
-      DataSubnet1ID:
-        default: Data subnet 1
-      DataSubnet2ID:
-        default: Data subnet 2
+      PrivateSubnetID:
+        default: Private subnet
       DBPassword:
         default: Database administrator password
       DBUsername:
@@ -35,11 +33,8 @@ Parameters:
   VPCID:
     Description: The VPC Id
     Type: AWS::EC2::VPC::Id
-  DataSubnet1ID:
-    Description: The first subnet the Aurora database cluster should be deployed to
-    Type: AWS::EC2::Subnet::Id
-  DataSubnet2ID:
-    Description: The second subnet the Aurora database cluster should be deployed to
+  PrivateSubnetID:
+    Description: "The private subnet the AWS Lambda function should be deployed to (NOTE: Required internet access)"
     Type: AWS::EC2::Subnet::Id
   DBUsername:
     Description: The Postgres DB username
@@ -64,7 +59,7 @@ Resources:
     Properties:
       TemplateURL:  "https://s3.amazonaws.com/xl-jetpack-aws/rds/rds-lambda.yaml"
       Parameters:
-        AuroraSubnets: !Join [ ',', [ !Ref DataSubnet1ID, !Ref DataSubnet2ID ]]
+        PrivateSubnets: !Ref PrivateSubnetID
         DBUser: !Ref DBUsername
         DBPassword: !Ref DBPassword
         DBHost: !Ref DBHost

@@ -44,18 +44,26 @@ image:https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-sta
 ==== Step 3b: Empty VPC
 If you have an empty VPC, click the button below to run a CloudFormation template that will set up Amazon Aurora PostgreSQL and provision the necessary databases.
 
-If you've used the CloudFormation stack from step 1, use the DataSubnetA and DataSubnetB provisioned by the template.
+If you've used the CloudFormation stack from step 1, use the `DataSubnetA` and `DataSubnetB` provisione
 
 image:https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png[link=https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack-RDS&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/setup-xl-jetpack-rds.yaml]
 
+d by the template for the `DataSubnetIDs`. Also use `PrivateSubnet1A` for the `PrivateSubnetID`.
+
+NOTE: Ensure that the subnet specified in the `PrivateSubnetID` parameter has a NAT Gateway attached and has outgoing internet access. The template will deploy a custom Lambda to the subnet which requires internet access.
+
 An example configuration of the CloudFormation parameters looks like this:
 
-image:images/rds-cfn-1.png[]
+image::images/rds-cfn-1.png[]
+
+In the last step of the CloudFormation wizard, ensure that you check both of the boxes as seen on the following image:
+
+image::images/rds-cfn-2.png[]
 
 === Step 4: Launch the XL JetPack stack
 After you've set up an http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html[AWS VPC], an http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html[EC2 Key Pair], and https://aws.amazon.com/rds/aurora/details/postgresql-details/[Amazon Aurora PostgreSQL], you can blast off with XL JetPack.
 
 To start XL JetPack, please click the below launch button to start the CloudFormation template that will provision the XL JetPack containers in your AWS account.
 
-image:https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png[link=https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack-RDS&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/setup-xl-jetpack-rds.yaml]
+image:https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png[link=https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create?stackName=XLJetPack&templateURL=https://s3.amazonaws.com/xl-jetpack-aws/install-xl-jetpack-aws.yaml]
 

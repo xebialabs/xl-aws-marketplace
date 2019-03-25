@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import psycopg2
-from cfn_lambda_handler import Handler, SUCCESS, FAILED
+import cfnresponse
 import logging
 import json
 
@@ -9,18 +9,15 @@ logger.setLevel(logging.DEBUG)
 logging.info("Started Lambda!")
 physical_resource_id = "dummy-resource-id"
 
-handler = Handler()
-
 def fail(reason, physical_resource_id=physical_resource_id):
     logger.error("Failed [%s]: %s" % (physical_resource_id, reason))
-    return {"Status": FAILED, "PhysicalResourceId": physical_resource_id, "Reason": reason}
+    return (cfnresponse.FAILED, physical_resource_id, reason)
 
 def check_props(props, param):
     if param not in props or not props[param]:
         raise Exception('Parameter %s not found.' % param)
     return props[param]
 
-@handler.create
 def create_database(event, context):
     props = event['ResourceProperties']
     logger.info('Got event: %s' % event)
@@ -61,22 +58,16 @@ def create_database(event, context):
         if conn:
             conn.close()
     logger.info("Done!")
-    return { "Status": SUCCESS, "PhysicalResourceId": physical_resource_id, "Reason": 'Successfully created databases %s' % db_names }
+    return (cfnresponse.SUCCESS, physical_resource_id, 'Successfully created databases %s' % db_names)
 
-
-@handler.delete
-def delete(event, context):
-    props = event['ResourceProperties']
-    logger.info('Got event: %s' % event)
+def handler(event, context):
+    logger.info('Received event: %s' % json.dumps(event))
+    status = cfnresponse.SUCCESS
+    physical_resource_id = None
+    data = {}
+    reason = None
     try:
-        db_names = check_props(props, 'DBNames')
-        db_user = check_props(props, 'DBUser')
-        db_password = check_props(props, 'DBPassword')
-        db_host = check_props(props, 'DBHost')
-        if 'PhysicalResourceId' in event:
-            physical_resource_id = event['PhysicalResourceId']
-        else:
-            physical_resource_id = "%s_%s" % (db_host, db_names[0])
-    except Exception as e:
-        return fail(str(e), physical_resource_id="parameters-not-set")
-    return {"Status": SUCCESS, "PhysicalResourceId": physical_resource_id, "Reason": 'Nothing to delete, keeping data intact'}
+        if event['RequestType'] == 'Create':
+            status, physical_resource_id, reason = create_database(event, context)
+    finally:
+        cfnresponse.send(event, context, status, data, physical_resource_id, False, reason)

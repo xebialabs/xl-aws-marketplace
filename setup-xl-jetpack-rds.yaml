@@ -7,8 +7,8 @@ Metadata:
           default: Network Configuration
         Parameters:
           - VPCID
-          - DataSubnet1ID
-          - DataSubnet2ID
+          - DataSubnetIDs
+          - PrivateSubnetID
       - Label:
           default: Database Configuration
         Parameters:
@@ -19,10 +19,10 @@ Metadata:
     ParameterLabels:
       VPCID:
         default: VPC ID
-      DataSubnet1ID:
-        default: Data subnet 1
-      DataSubnet2ID:
-        default: Data subnet 2
+      DataSubnetIDs:
+        default: Data subnets
+      PrivateSubnetID:
+        default: Private subnet
       DBMasterPassword:
         default: Database administrator password
       DBMasterUsername:
@@ -35,11 +35,11 @@ Parameters:
   VPCID:
     Description: The VPC Id
     Type: AWS::EC2::VPC::Id
-  DataSubnet1ID:
-    Description: The first subnet the Aurora database cluster should be deployed to
-    Type: AWS::EC2::Subnet::Id
-  DataSubnet2ID:
-    Description: The second subnet the Aurora database cluster should be deployed to
+  DataSubnetIDs:
+    Description: The subnets the Aurora database cluster should be deployed to
+    Type: List<AWS::EC2::Subnet::Id>
+  PrivateSubnetID:
+    Description: "The private subnet the AWS Lambda function should be deployed to (NOTE: Required internet access)"
     Type: AWS::EC2::Subnet::Id
   DBMasterUsername:
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
@@ -90,7 +90,7 @@ Resources:
     Properties:
       TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/rds/rds.yaml
       Parameters:
-        Subnets: !Join [ ',', [ !Ref DataSubnet1ID, !Ref DataSubnet2ID ]]
+        Subnets: !Join [ ",", !Ref DataSubnetIDs ]
         DBMasterUsername: !Ref DBMasterUsername
         DBMasterPassword: !Ref DBMasterPassword
         DBInstanceClass: !Ref DBInstanceClass
@@ -101,7 +101,7 @@ Resources:
     Properties:
       TemplateURL:  https://s3.amazonaws.com/xl-jetpack-aws/rds/rds-lambda.yaml
       Parameters:
-        AuroraSubnets: !Join [ ',', [ !Ref DataSubnet1ID, !Ref DataSubnet2ID ]]
+        PrivateSubnets: !Ref PrivateSubnetID
         DBUser: !Ref DBMasterUsername
         DBPassword: !Ref DBMasterPassword
         DBHost: !GetAtt RDSStack.Outputs.AuroraEndPointAddress
@@ -113,7 +113,7 @@ Outputs:
     Value: !GetAtt RDSSecurityGroupStack.Outputs.RDSSecurityGroup
   AuroraEndPointAddress:
     Description: Aurora Cluster Endpoint address to connect to
-    Value: !GetAtt RDSStack.Outputs.AuroraEndpointAddress
+    Value: !GetAtt RDSStack.Outputs.AuroraEndPointAddress
   AuroraEndPointPort:
     Description: Aurora Cluster Endpoint port to connect to
-    Value: !GetAtt RDSStack.Outputs.AuroraEndpointPort
+    Value: !GetAtt RDSStack.Outputs.AuroraEndPointPort
