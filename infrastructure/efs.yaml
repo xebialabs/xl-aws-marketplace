@@ -14,12 +14,9 @@ Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id
     Description: The VPC EFS should be deployed to
-  VPCCIDR:
-    Description: Enter the CIDR Range for your VPC
-    Type: String
-    Default: 10.0.0.0/19
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  ECSSecurityGroup:
+    Description: The security group to attach to the ECS cluster instances
+    Type: AWS::EC2::SecurityGroup::Id
   Subnets:
     Description: The private subnets this EFS can be mount
     Type: List<AWS::EC2::Subnet::Id>
@@ -29,15 +26,11 @@ Resources:
   MountTargetSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId:
-        Ref: VPCID
+      VpcId: !Ref VPCID
       GroupDescription: Security group for mount target
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: '2049'
-        ToPort: '2049'
-        CidrIp:
-          Ref: VPCCIDR
+      - SourceSecurityGroupId: !Ref ECSSecurityGroup
+        IpProtocol: '-1'
       Tags:
       - Key: Name
         Value: !Sub ${EnvironmentName}-EFS-Hosts

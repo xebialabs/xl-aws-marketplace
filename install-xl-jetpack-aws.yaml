@@ -10,16 +10,15 @@ Metadata:
         Parameters:
           - VPCID
           - RemoteAccessCIDR
-          - VPCCIDR
-          - PrivateSubnetID
-          - PublicSubnetID
+          - PrivateSubnetIDs
+          - PublicSubnetIDs
       - Label:
           default: RDS Configuration
         Parameters:
           - RDSSecurityGroup
           - DBHost
           - DBPort
-          - DBUser
+          - DBUsername
           - DBPassword
       - Label:
           default: HTTP Configuration
@@ -41,12 +40,10 @@ Metadata:
     ParameterLabels:
       VPCID:
         default: VPC ID
-      VPCCIDR:
-        default: VPC CIDR
-      PublicSubnetID:
-        default: Public subnet
-      PrivateSubnetID:
-        default: Private subnet
+      PublicSubnetIDs:
+        default: Public subnets
+      PrivateSubnetIDs:
+        default: Private subnets
       XLJetPackInstanceType:
         default: XL JetPack instance type
       KeyPairName:
@@ -79,18 +76,12 @@ Parameters:
   VPCID:
     Description: The VPC Id
     Type: AWS::EC2::VPC::Id
-  VPCCIDR:
-    Description: Enter the CIDR Range for your VPC
-    Type: String
-    Default: 10.0.0.0/19
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
-  PublicSubnetID:
+  PublicSubnetIDs:
     Description: The public subnet XL JetPack should reachable on
-    Type: AWS::EC2::Subnet::Id
-  PrivateSubnetID:
+    Type: List<AWS::EC2::Subnet::Id>
+  PrivateSubnetIDs:
     Description: The private subnet XL JetPack should be deployed to
-    Type: AWS::EC2::Subnet::Id
+    Type: List<AWS::EC2::Subnet::Id>
   Fulfilment:
     Description: The AWS Marketplace fulfilment chosen
     Type: String
@@ -151,6 +142,9 @@ Parameters:
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you to securely connect to your instance after it launches
     Type: AWS::EC2::KeyPair::KeyName
+Conditions:
+  SslCertificateProvided: !Not [ !Equals [ !Ref SslCertificateArn, ':default' ] ]
+
 Resources:
   SecurityGroupsStack:
     Type: AWS::CloudFormation::Stack
@@ -167,15 +161,15 @@ Resources:
       Parameters:
         EnvironmentName: xl-jetpack-aws
         VPCID: !Ref VPCID
-        VPCCIDR: !Ref VPCCIDR
-        Subnets: !Ref PrivateSubnetID
+        ECSSecurityGroup: !GetAtt SecurityGroupsStack.Outputs.ECSHostSecurityGroup
+        Subnets: !Join [ ",", !Ref PrivateSubnetIDs ]
   ECSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/ecs.yaml
       Parameters:
         EnvironmentName: xl-jetpack-aws
-        Subnets: !Ref PrivateSubnetID
+        Subnets: !Join [ ",", !Ref PrivateSubnetIDs ]
         InstanceType: !Ref XLJetPackInstanceType
         DesiredClusterSize: 2
         MinimumClusterSize: 2
@@ -191,7 +185,7 @@ Resources:
       Parameters:
         EnvironmentName: xl-jetpack-aws
         VPCID: !Ref VPCID
-        Subnets: !Ref PublicSubnetID
+        Subnets: !Join [ ",", !Ref PublicSubnetIDs ]
         SecurityGroup: !GetAtt SecurityGroupsStack.Outputs.LoadBalancerSecurityGroup
   XLJetPackServices:
     Type: 'AWS::CloudFormation::Stack'
@@ -213,7 +207,6 @@ Resources:
         DBPort: !Ref DBPort
         DBUser: !Ref DBUsername
         DBPassword: !Ref DBPassword
-        VPCCIDR: !Ref VPCCIDR
         MountPoint: !GetAtt EFSStack.Outputs.Filesystem
         SslCertificateArn: !Ref SslCertificateArn
 Outputs:
