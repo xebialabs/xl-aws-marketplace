@@ -82,7 +82,18 @@ Mappings:
   Marketplace:
     'XL-JetPack-10users':
       AWSProductCode: 75neoqyxrij1cptfd2gj57kdv
-      AWSPublicKey: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQm9qQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FZOEFNSUlCaWdLQ0FZRUF5TFZ5RTl3MWxNc1ZxK1JIeHp3MApyMTNpZkVIc1JieVNkM3QvbUR1UnIralpZQmFFVWdpL0VLR1QrWS9KTnlzSVkrbWZ2MEltNDcvVklIZjJPU0ZiCkFMNHFQdG12c01lc3ZOa2lPdytBMmZrTEI0SHRCb080aTRTN08xTkp6aGxRcGN4RjQzbTlZTjdsUGRDNis5OUkKL2wzOHNPLy9STmdmM2JnSXdhSmpqUEh3azNid1hqRzhkZ1pxY0QxampaSGhlclNpRUNmL2JCT2M5dXJiODFMcApybGdPSGtuUWNTUTgrZElTaVVyYnpFZTRMdjI2Ukx5YUJoSGZacmVISzBDRGdzOUtBVTVPYU0zMm1uYzZ2c01lClZneTJacGMzSHhiblF4UEIvOEd1YmhNWU42clUyclVna0l5eFZrNzNWc2M3WmlFR2UxcDBtUno1V0RrZG5jM2cKbmNkcERUdll4Mlk4Y0g1WHlMN2pMOFNXSm9WRHVMeUVnM0xISDNIVkxNdzZSRFFEU1BwWnZ5aFFlZTJHaFltcgpoSmNpNTdRSmY5VG13bDRYUnBhRENzbkpmeFplUXI0UW5ocldlTXlyWC9WQUFucTZIM2JNUHJ1ZGV0b3ZHMnNGCmxySmFOdmtPQ05VR0JkNzZhUDh5aS8rQ1EyQXUzZTFzS3BURktrQ2lkZ1haQWdNQkFBRT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
+      AWSPublicKey: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAyLVyE9w1lMsVq+RHxzw0
+        r13ifEHsRbySd3t/mDuRr+jZYBaEUgi/EKGT+Y/JNysIY+mfv0Im47/VIHf2OSFb
+        AL4qPtmvsMesvNkiOw+A2fkLB4HtBoO4i4S7O1NJzhlQpcxF43m9YN7lPdC6+99I
+        /l38sO//RNgf3bgIwaJjjPHwk3bwXjG8dgZqcD1jjZHherSiECf/bBOc9urb81Lp
+        rlgOHknQcSQ8+dISiUrbzEe4Lv26RLyaBhHfZreHK0CDgs9KAU5OaM32mnc6vsMe
+        Vgy2Zpc3HxbnQxPB/8GubhMYN6rU2rUgkIyxVk73Vsc7ZiEGe1p0mRz5WDkdnc3g
+        ncdpDTvYx2Y8cH5XyL7jL8SWJoVDuLyEg3LHH3HVLMw6RDQDSPpZvyhQee2GhYmr
+        hJci57QJf9Tmwl4XRpaDCsnJfxZeQr4QnhrWeMyrX/VAAnq6H3bMPrudetovG2sF
+        lrJaNvkOCNUGBd76aP8yi/+CQ2Au3e1sKpTFKkCidgXZAgMBAAE=
+        -----END PUBLIC KEY-----
       AWSPublicKeyVersion: 1
 Conditions: 
   SslCertificateProvided: !Not [ !Equals [ !Ref SslCertificateArn, ':default' ] ]
@@ -117,10 +128,11 @@ Resources:
   JetPackDeployTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
+      TaskRoleArn: !Ref TaskExecutionRole
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-deploy
-          Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion ] ]
+          Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
@@ -146,6 +158,8 @@ Resources:
               Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
             - Name: AWS_PUBLIC_KEY_VERSION
               Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
+            - Name: AWS_PUBLIC_KEY
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKey ]
           Hostname: xl-jetpack-deploy
           MountPoints:
             - ContainerPath: "/opt/xebialabs/xl-deploy-server/work"
@@ -163,10 +177,11 @@ Resources:
   JetPackReleaseTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
+      TaskRoleArn: !Ref TaskExecutionRole
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion ] ]
+          Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
           # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
@@ -198,6 +213,8 @@ Resources:
               Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
             - Name: AWS_PUBLIC_KEY_VERSION
               Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
+            - Name: AWS_PUBLIC_KEY
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKey ]
           Hostname: xl-jetpack-release
           MountPoints:
             - ContainerPath: "/opt/xebialabs/xl-release-server/work"

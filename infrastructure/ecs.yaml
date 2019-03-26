@@ -293,6 +293,7 @@ Resources:
               "Resource": "*"
             }]
           }
+
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -307,7 +308,17 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-      - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      Policies:
+        - PolicyName: marketplace-metering
+          PolicyDocument: |
+            {
+                "Statement": [{
+                    "Effect": "Allow",
+                    "Action": ["aws-marketplace:RegisterUsage"],
+                    "Resource": "*"
+                }]
+            }
 
   ECSCloudWatchParameter:
     Type: AWS::SSM::Parameter
