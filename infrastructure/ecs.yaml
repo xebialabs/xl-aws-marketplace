@@ -255,14 +255,14 @@ Resources:
     Properties: 
       Path: /
       RoleName: !Sub ${EnvironmentName}-ECSServiceRole-${AWS::Region}
-      AssumeRolePolicyDocument: |
-        {
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": { "Service": [ "ecs.amazonaws.com" ]},
-            "Action": [ "sts:AssumeRole" ]
-          }]
-        }
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ecs.amazonaws.com
+          Action:
+          - sts:AssumeRole
       Policies: 
       - PolicyName: !Sub ecs-service-${AWS::StackName}
         PolicyDocument: 
