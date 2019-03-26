@@ -208,7 +208,6 @@ Resources:
         DBPort: !Ref DBPort
         DBUser: !Ref DBUsername
         DBPassword: !Ref DBPassword
-        MountPoint: !GetAtt EFSStack.Outputs.Filesystem
         SslCertificateArn: !Ref SslCertificateArn
 Outputs:
   JetPackDeployURL:
