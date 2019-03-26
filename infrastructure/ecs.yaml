@@ -118,12 +118,30 @@ Resources:
           packages:
             yum:
               collectd: []
+              nfs-utils: []
 
           commands:
             01_add_instance_to_cluster:
               command: !Sub echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
             02_enable_cloudwatch_agent:
               command: !Sub /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c ssm:${ECSCloudWatchParameter} -s
+            03_createdir:
+              command: !Sub "mkdir -p /${MountPoint}"
+            04_mount:
+              command: !Sub >
+                mount -t nfs4 -o nfsvers=4.1 ${Filesystem}.efs.${AWS::Region}.amazonaws.com:/ /${MountPoint}
+            05_fstab:
+              command: !Sub >
+                echo ${Filesystem}.efs.${AWS::Region}.amazonaws.com:/ /${MountPoint} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2 0 0 >> /etc/fstab
+            # 03_permissions:
+            #  command: !Sub "chown -R ec2-user:ec2-user /${MountPoint}"
+            06_permissions_ecs_xld:
+              command: !Sub "mkdir -p /${MountPoint}/xl-deploy/repository && mkdir -p /${MountPoint}/xl-deploy/work && chmod g+w -R /${MountPoint}"
+            07_permissions_ecs_xlr:
+              command: !Sub "mkdir -p /${MountPoint}/xl-release/repository && mkdir -p /${MountPoint}/xl-release/work && chmod g+w -R /${MountPoint}"
+            # 08_restart_docker_and_ecs:
+            #   command: "service docker restart && start ecs"
+
           files:
             /etc/cfn/cfn-hup.conf:
               mode: 000400

@@ -168,6 +168,7 @@ Resources:
     Properties:
       TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/infrastructure/ecs.yaml
       Parameters:
+        VPC: !Ref VPCID
         EnvironmentName: xl-jetpack-aws
         Subnets: !Join [ ",", !Ref PrivateSubnetIDs ]
         InstanceType: !Ref XLJetPackInstanceType
