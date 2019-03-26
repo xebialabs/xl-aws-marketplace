@@ -216,6 +216,15 @@ Resources:
                     "Resource": "*"
                 }]
             }
+        - PolicyName: marketplace-metering
+          PolicyDocument: |
+            {
+                "Statement": [{
+                    "Effect": "Allow",
+                    "Action": ["aws-marketplace:RegisterUsage"],
+                    "Resource": "*"
+                }]
+            }
 
   ECSInstanceProfile:
     Type: AWS::IAM::InstanceProfile
