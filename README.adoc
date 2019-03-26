@@ -76,5 +76,7 @@ In the last step of the CloudFormation wizard, ensure that you check both of the
 
 image::images/rds-cfn-2.png[]
 
-Once the stack has been created fully, you can point your browser to:
+Once the stack has been created fully, you can visit the Output page of the `XL-JetPack` CloudFormation stack and get the URLs to the XL JetPack products there.
+
+image::images/jetpack-cfn-output.png[]
 
