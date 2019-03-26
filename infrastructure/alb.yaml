@@ -12,7 +12,7 @@ Parameters:
     Description: The VPC the Application Load Balancer should be deployed to
 
   Subnets:
-    Description: The private subnets the Application Load Balancer should be deployed to
+    Description: The public subnets the Application Load Balancer should be deployed to
     Type: List<AWS::EC2::Subnet::Id>
 
   SecurityGroup:

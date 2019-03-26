@@ -49,14 +49,14 @@ Resources:
       SubnetId: !Select [ 0, !Ref Subnets ]
       SecurityGroups:
       - Ref: MountTargetSecurityGroup
-  # MountTarget2:
-  #   Type: AWS::EFS::MountTarget
-  #   Properties:
-  #     FileSystemId:
-  #       Ref: FileSystem
-  #     SubnetId: !Select [ 1, !Ref Subnets ]
-  #     SecurityGroups:
-  #     - Ref: MountTargetSecurityGroup
+  MountTarget2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId:
+        Ref: FileSystem
+      SubnetId: !Select [ 1, !Ref Subnets ]
+      SecurityGroups:
+      - Ref: MountTargetSecurityGroup
 
 Outputs:
   Filesystem:
