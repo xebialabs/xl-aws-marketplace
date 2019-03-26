@@ -88,9 +88,9 @@ Conditions:
   SslCertificateProvided: !Not [ !Equals [ !Ref SslCertificateArn, ':default' ] ]
 
 Resources:
-  JetPackService:
+  JetPackDeployService:
     Type: AWS::ECS::Service
-    DependsOn: [ XLJetPackDeployALBListener, XLJetPackReleaseALBListener ]
+    DependsOn: [ XLJetPackDeployALBListener ]
     Properties:
       Cluster: !Ref ECSCluster
       Role: !Ref ECSServiceRole
@@ -100,17 +100,74 @@ Resources:
         - ContainerName: xl-jetpack-deploy
           ContainerPort: !Ref XLJetPackDeployPort
           TargetGroupArn: !Ref XLJetPackDeployTargetGroup
+      TaskDefinition: !Ref JetPackDeployTaskDefinition
+  JetPackReleaseService:
+    Type: AWS::ECS::Service
+    DependsOn: [ XLJetPackReleaseALBListener ]
+    Properties:
+      Cluster: !Ref ECSCluster
+      Role: !Ref ECSServiceRole
+      DesiredCount: 1
+      LaunchType: EC2
+      LoadBalancers:
         - ContainerName: xl-jetpack-release
           ContainerPort: !Ref XLJetPackReleasePort
           TargetGroupArn: !Ref XLJetPackReleaseTargetGroup
-      TaskDefinition: !Ref JetPackTaskDefinition
-  JetPackTaskDefinition:
+      TaskDefinition: !Ref JetPackReleaseTaskDefinition
+  JetPackDeployTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ExecutionRoleArn: !Ref TaskExecutionRole
+      ContainerDefinitions:
+        - Name: xl-jetpack-deploy
+          Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion ] ]
+          # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
+          Memory: 2048
+          Cpu: 2
+          PortMappings:
+            - ContainerPort: !Ref XLJetPackDeployPort
+              Protocol: tcp
+          Environment:
+            - Name: ADMIN_PASSWORD
+              Value: !Ref XLJetPackDeployAdminPassword
+            - Name: XL_CLUSTER_MODE
+              Value: default
+            - Name: XL_DB_URL
+              Value: !Sub "jdbc:postgresql://${DBHost}:${DBPort}/xldeploy"
+            - Name: XL_DB_USERNAME
+              Value: !Ref DBUser
+            - Name: XL_DB_PASSWORD
+              Value: !Ref DBPassword
+            - Name: XL_METRICS_ENABLED
+              Value: "false"
+            - Name: XL_LICENSE_KIND
+              Value: aws
+            - Name: AWS_PRODUCT_CODE
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
+            - Name: AWS_PUBLIC_KEY_VERSION
+              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
+          Hostname: xl-jetpack-deploy
+          MountPoints:
+            - ContainerPath: "/opt/xebialabs/xl-deploy-server/work"
+              SourceVolume: xl-deploy-work-efs
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: xl-jetpack-deploy
+      Volumes:
+        - Host:
+            SourcePath: !Sub "${MountPoint}/xl-deploy/work"
+          Name: xl-deploy-work-efs
+  JetPackReleaseTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
+          Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion ] ]
+          # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -145,43 +202,16 @@ Resources:
           MountPoints:
             - ContainerPath: "/opt/xebialabs/xl-release-server/work"
               SourceVolume: xl-release-work-efs
-        - Name: xl-jetpack-deploy
-          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
-          Memory: 2048
-          Cpu: 2
-          PortMappings:
-            - ContainerPort: !Ref XLJetPackDeployPort
-              Protocol: tcp
-          Environment:
-            - Name: ADMIN_PASSWORD
-              Value: !Ref XLJetPackDeployAdminPassword
-            - Name: XL_CLUSTER_MODE
-              Value: default
-            - Name: XL_DB_URL
-              Value: !Sub "jdbc:postgresql://${DBHost}:${DBPort}/xldeploy"
-            - Name: XL_DB_USERNAME
-              Value: !Ref DBUser
-            - Name: XL_DB_PASSWORD
-              Value: !Ref DBPassword
-            - Name: XL_METRICS_ENABLED
-              Value: "false"
-            - Name: XL_LICENSE_KIND
-              Value: aws
-            - Name: AWS_PRODUCT_CODE
-              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSProductCode ]
-            - Name: AWS_PUBLIC_KEY_VERSION
-              Value: !FindInMap [ Marketplace, !Ref Fulfilment, AWSPublicKeyVersion ]
-          Hostname: xl-jetpack-deploy
-          MountPoints:
-            - ContainerPath: "/opt/xebialabs/xl-deploy-server/work"
-              SourceVolume: xl-deploy-work-efs
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: xl-jetpack-release
       Volumes:
         - Host:
             SourcePath: !Sub "${MountPoint}/xl-release/work"
           Name: xl-release-work-efs
-        - Host:
-            SourcePath: !Sub "${MountPoint}/xl-deploy/work"
-          Name: xl-deploy-work-efs
 
   XLJetPackDeployALBListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -265,4 +295,8 @@ Resources:
       ToPort: !Ref XLJetPackReleasePort
       GroupId: !Ref ALBSecurityGroup
       IpProtocol: tcp
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${AWS::StackName}"
 # Outputs:
