@@ -132,8 +132,8 @@ Resources:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-deploy
-          Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
-          # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
+          #Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -181,8 +181,8 @@ Resources:
       ExecutionRoleArn: !Ref TaskExecutionRole
       ContainerDefinitions:
         - Name: xl-jetpack-release
-          Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
-          # Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
+          # Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
+          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
           Memory: 2048
           Cpu: 2
           PortMappings:
