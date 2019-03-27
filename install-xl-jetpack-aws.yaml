@@ -191,8 +191,7 @@ Resources:
   XLJetPackServices:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TemplateURL: https://raw.githubusercontent.com/xebialabs/xl-aws-marketplace/master/services/xl-jetpack.yaml
-      # https://s3.amazonaws.com/xl-jetpack-aws/services/xl-jetpack.yaml
+      TemplateURL: https://s3.amazonaws.com/xl-jetpack-aws/services/xl-jetpack.yaml
       Parameters:
         VPCID: !Ref VPCID
         ECSCluster: !GetAtt ECSStack.Outputs.Cluster
