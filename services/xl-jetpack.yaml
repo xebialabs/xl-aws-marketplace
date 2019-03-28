@@ -18,7 +18,7 @@ Parameters:
     AllowedValues: ['XL-JetPack-10users']
   XLJetPackVersion:
     Description: The version of XL JetPack to deploy
-    AllowedValues: ['8.6.0']
+    AllowedValues: ['8.6.1']
     Type: String
   XLJetPackDeployAdminPassword:
     Description: The admin password of XL JetPack Deploy
@@ -95,6 +95,10 @@ Mappings:
         lrJaNvkOCNUGBd76aP8yi/+CQ2Au3e1sKpTFKkCidgXZAgMBAAE=
         -----END PUBLIC KEY-----
       AWSPublicKeyVersion: 1
+  ContainerGroup:
+    '8.6.1':
+      Group: 'cg-2281266242'
+      VersionSuffix: "-amazonlinux"
 Conditions: 
   SslCertificateProvided: !Not [ !Equals [ !Ref SslCertificateArn, ':default' ] ]
 
@@ -133,7 +137,13 @@ Resources:
       ContainerDefinitions:
         - Name: xl-jetpack-deploy
           #Image: !Join [ "", ["xebialabs/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
-          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-deploy:", !Ref XLJetPackVersion, "-latest" ] ]
+          Image: !Join 
+            - ""
+            - - "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/"
+              - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, Group ]
+              - "/xl-jetpack-deploy:"
+              - !Ref XLJetPackVersion
+              - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, VersionSuffix ]
           Memory: 2048
           Cpu: 2
           PortMappings:
@@ -182,7 +192,13 @@ Resources:
       ContainerDefinitions:
         - Name: xl-jetpack-release
           # Image: !Join [ "", ["xebialabs/xl-jetpack-release:", !Ref XLJetPackVersion, "-amazonlinux" ] ]
-          Image: !Join [ "", [ "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/cg-203266886/xl-jetpack-release:", !Ref XLJetPackVersion, "-latest" ] ]
+          Image: !Join 
+            - ""
+            - - "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/"
+              - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, Group ]
+              - "/xl-jetpack-release:"
+              - !Ref XLJetPackVersion
+              - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, VersionSuffix ]
           Memory: 2048
           Cpu: 2
           PortMappings:
