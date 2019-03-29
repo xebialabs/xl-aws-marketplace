@@ -98,7 +98,7 @@ Mappings:
   ContainerGroup:
     '8.6.1':
       Group: 'cg-2281266242'
-      VersionSuffix: "-amazonlinux"
+      VersionSuffix: "-latest"
 Conditions: 
   SslCertificateProvided: !Not [ !Equals [ !Ref SslCertificateArn, ':default' ] ]
 
@@ -141,7 +141,7 @@ Resources:
             - ""
             - - "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/"
               - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, Group ]
-              - "/xl-jetpack-deploy:"
+              - "/xebialabs/xl-jetpack-deploy:"
               - !Ref XLJetPackVersion
               - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, VersionSuffix ]
           Memory: 2048
@@ -196,7 +196,7 @@ Resources:
             - ""
             - - "117940112483.dkr.ecr.us-east-1.amazonaws.com/78e3b5db-bc6e-4596-9a0c-74624d2633f3/"
               - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, Group ]
-              - "/xl-jetpack-release:"
+              - "/xebialabs/xl-jetpack-release:"
               - !Ref XLJetPackVersion
               - !FindInMap [ ContainerGroup, !Ref XLJetPackVersion, VersionSuffix ]
           Memory: 2048
